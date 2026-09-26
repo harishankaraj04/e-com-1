@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid px-lg-5">
+
+  <!-- HERO PROMO CAROUSEL (Flipkart Big Billion Days Style) -->
+  {% if not search_query and not selected_category and not selected_brand %}
+  <div id="heroCarousel" class="carousel slide fk-hero-carousel mb-4" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+      <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+    </div>
+    
+    <div class="carousel-inner">
+      
+      <!-- Slide 1 -->
+      <div class="carousel-item active">
+        <div class="hero-slide" style="background: linear-gradient(135deg, #1d2671 0%, #c33764 100%);">
+          <div class="col-md-7">
+            <span class="hero-tag">💥 THE BIG BOOM DAYS</span>
+            <h1 class="hero-title">Super Flagships & Electronics Fest</h1>
+            <p class="hero-subtitle">Get up to 45% Off on iPhones, Galaxies, MacBooks & Smart TVs</p>
+            <div class="d-flex gap-3 align-items-center">
+              <a href="{{ url_for('index', category='Mobiles') }}" class="hero-btn">Shop Smartphones</a>
+              <span class="text-warning fw-bold"><i class="bi bi-lightning-charge-fill"></i> Extra ₹5,000 Bank Off</span>
+            </div>
+          </div>
+          <div class="col-md-5 d-none d-md-flex justify-content-center">
+            <img src="https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=600&auto=format&fit=crop&q=80" 
+                 alt="iPhone 15 Pro Max" 
+                 class="rounded shadow-lg"
+                 style="max-height: 220px; object-fit: contain;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 2 -->
+      <div class="carousel-item">
+        <div class="hero-slide" style="background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);">
+          <div class="col-md-7">
+            <span class="hero-tag">🎧 AUDIO & WEARABLES EXTRAVAGANZA</span>
+            <h1 class="hero-title">Experience Sound Without Limits</h1>
+            <p class="hero-subtitle">Up to 70% Off on Sony Noise Cancelling, AirPods & boAt Earbuds</p>
+            <div class="d-flex gap-3 align-items-center">
+              <a href="{{ url_for('index', category='Audio') }}" class="hero-btn">Explore Audio</a>
+              <span class="text-white fw-bold"><i class="bi bi-truck"></i> Free Next-Day Delivery</span>
+            </div>
+          </div>
+          <div class="col-md-5 d-none d-md-flex justify-content-center">
+            <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&auto=format&fit=crop&q=80" 
+                 alt="Sony XM5" 
+                 class="rounded shadow-lg"
+                 style="max-height: 220px; object-fit: contain;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3 -->
+      <div class="carousel-item">
+        <div class="hero-slide" style="background: linear-gradient(135deg, #4b1248 0%, #f0c27b 100%);">
+          <div class="col-md-7">
+            <span class="hero-tag">👟 FASHION & LIFESTYLE CARNIVAL</span>
+            <h1 class="hero-title">Step Up Your Everyday Style</h1>
+            <p class="hero-subtitle">Air Jordans, Levi's Originals, Ray-Ban Aviators & Fossil Watches</p>
+            <div class="d-flex gap-3 align-items-center">
+              <a href="{{ url_for('index', category='Fashion') }}" class="hero-btn">Shop Fashion</a>
+              <span class="text-dark fw-bold bg-warning px-2 py-1 rounded">100% Genuine Brands</span>
+            </div>
+          </div>
+          <div class="col-md-5 d-none d-md-flex justify-content-center">
+            <img src="https://images.unsplash.com/photo-1552346154-21d32810aba3?w=600&auto=format&fit=crop&q=80" 
+                 alt="Nike Air Jordan" 
+                 class="rounded shadow-lg"
+                 style="max-height: 220px; object-fit: contain;">
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
+  </div>
+
+  <!-- DEALS OF THE DAY SECTION (Flipkart Signature) -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="section-header">
+      <div class="d-flex align-items-center gap-3">
+        <h2 class="section-title">
+          <i class="bi bi-clock-history text-danger"></i> Deals of the Day
+        </h2>
+        <span class="section-timer d-none d-sm-inline-block">
+          <i class="bi bi-hourglass-split"></i> 16h : 42m : 18s Left
+        </span>
+      </div>
+      <a href="{{ url_for('index', sort='discount') }}" class="btn btn-sm btn-primary px-3 fw-bold">VIEW ALL</a>
+    </div>
+
+    <div class="card-body p-3">
+      <div class="row g-3 row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6">
+        {% for deal in deals %}
+          <div class="col">
+            <div class="fk-card text-center p-2">
+              <a href="{{ url_for('product_detail', product_id=deal.id) }}" class="text-decoration-none text-dark">
+                <div style="height: 120px; display: flex; align-items: center; justify-content: center;" class="mb-2">
+                  <img src="{{ deal.image_url }}" alt="{{ deal.title }}" 
+                       onerror="handleImageError(this, '{{ deal.title }}')"
+                       style="max-height: 100%; max-width: 100%; object-fit: contain;">
+                </div>
+                <div class="fw-bold small text-truncate">{{ deal.title }}</div>
+                <div class="text-success fw-bold small mt-1">Up to {{ deal.discount_percent }}% Off</div>
+                <div class="text-muted small">{{ deal.category }}</div>
+              </a>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- MAIN CATALOG & FILTER LAYOUT -->
+  <div class="row g-3">
+    
+    <!-- LEFT SIDEBAR: FILTERS (Flipkart Style) -->
+    <div class="col-lg-3">
+      <div class="fk-filter-card">
+        <div class="filter-header">
+          <h3 class="filter-title">Filters</h3>
+          {% if search_query or selected_category or selected_brand or min_price or max_price or min_rating or min_discount %}
+            <a href="{{ url_for('index') }}" class="filter-clear">CLEAR ALL</a>
+          {% endif %}
+        </div>
+
+        <form action="{{ url_for('index') }}" method="GET" id="filter-form">
+          {% if search_query %}
+            <input type="hidden" name="q" value="{{ search_query }}">
+          {% endif %}
+          {% if sort_by %}
+            <input type="hidden" name="sort" value="{{ sort_by }}">
+          {% endif %}
+
+          <!-- Categories Filter -->
+          <div class="filter-section">
+            <div class="filter-section-title">Categories</div>
+            <label class="filter-option">
+              <input type="radio" name="category" value="" {{ 'checked' if not selected_category else '' }} onchange="this.form.submit()">
+              <span>All Categories</span>
+            </label>
+            {% for cat in ['Mobiles', 'Laptops', 'Audio', 'Appliances', 'Fashion', 'Home', 'Electronics'] %}
+              <label class="filter-option">
+                <input type="radio" name="category" value="{{ cat }}" {{ 'checked' if selected_category == cat else '' }} onchange="this.form.submit()">
+                <span>{{ cat }}</span>
+              </label>
+            {% endfor %}
+          </div>
+
+          <!-- Price Range Filter -->
+          <div class="filter-section">
+            <div class="filter-section-title">Price Range</div>
+            <div class="row g-2 mb-2">
+              <div class="col-6">
+                <select name="min_price" class="form-select form-select-sm" onchange="this.form.submit()">
+                  <option value="">Min</option>
+                  <option value="1000" {{ 'selected' if min_price == 1000 else '' }}>₹1,000</option>
+                  <option value="10000" {{ 'selected' if min_price == 10000 else '' }}>₹10,000</option>
+                  <option value="30000" {{ 'selected' if min_price == 30000 else '' }}>₹30,000</option>
+                  <option value="60000" {{ 'selected' if min_price == 60000 else '' }}>₹60,000</option>
+                </select>
+              </div>
+              <div class="col-6">
+                <select name="max_price" class="form-select form-select-sm" onchange="this.form.submit()">
+                  <option value="">Max</option>
+                  <option value="15000" {{ 'selected' if max_price == 15000 else '' }}>₹15,000</option>
+                  <option value="50000" {{ 'selected' if max_price == 50000 else '' }}>₹50,000</option>
+                  <option value="100000" {{ 'selected' if max_price == 100000 else '' }}>₹1,00,000</option>
+                  <option value="200000" {{ 'selected' if max_price == 200000 else '' }}>₹2,00,000+</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Brand Filter -->
+          <div class="filter-section">
+            <div class="filter-section-title">Brand</div>
+            <label class="filter-option">
+              <input type="radio" name="brand" value="" {{ 'checked' if not selected_brand else '' }} onchange="this.form.submit()">
+              <span>All Brands</span>
+            </label>
+            {% for b in brands %}
+              <label class="filter-option">
+                <input type="radio" name="brand" value="{{ b }}" {{ 'checked' if selected_brand == b else '' }} onchange="this.form.submit()">
+                <span>{{ b }}</span>
+              </label>
+            {% endfor %}
+          </div>
+
+          <!-- Customer Ratings Filter -->
+          <div class="filter-section">
+            <div class="filter-section-title">Customer Ratings</div>
+            {% for r in [4.5, 4.0, 3.0] %}
+              <label class="filter-option">
+                <input type="radio" name="min_rating" value="{{ r }}" {{ 'checked' if min_rating == r else '' }} onchange="this.form.submit()">
+                <span>{{ r }}★ & above</span>
+              </label>
+            {% endfor %}
+          </div>
+
+          <!-- Discount Filter -->
+          <div class="filter-section">
+            <div class="filter-section-title">Discount</div>
+            {% for d in [40, 30, 20, 10] %}
+              <label class="filter-option">
+                <input type="radio" name="min_discount" value="{{ d }}" {{ 'checked' if min_discount == d else '' }} onchange="this.form.submit()">
+                <span>{{ d }}% or more</span>
+              </label>
+            {% endfor %}
+          </div>
+
+          <div class="mt-3">
+            <button type="submit" class="btn btn-primary w-100 btn-sm fw-bold">APPLY FILTERS</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- RIGHT CATALOG AREA -->
+    <div class="col-lg-9">
+      
+      <!-- Top Sort Bar (Flipkart Style) -->
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body py-2 px-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+          
+          <div class="d-flex align-items-center gap-2">
+            <span class="fw-bold small">Showing {{ total_results }} Products</span>
+            {% if search_query %}
+              <span class="text-muted small">for <strong class="text-dark">"{{ search_query }}"</strong></span>
+            {% elif selected_category %}
+              <span class="text-muted small">in <strong class="text-dark">{{ selected_category }}</strong></span>
+            {% endif %}
+          </div>
+
+          <!-- Flipkart Sort Options -->
+          <div class="d-flex align-items-center gap-3 overflow-x-auto">
+            <span class="fw-bold small text-muted text-uppercase">Sort By:</span>
+            
+            <a href="{{ url_for('index', q=search_query, category=selected_category, brand=selected_brand, min_price=min_price, max_price=max_price, min_rating=min_rating, min_discount=min_discount, sort='popularity') }}" 
+               class="small text-decoration-none pb-1 border-bottom-2 {{ 'fw-bold text-primary border-bottom border-primary border-2' if sort_by == 'popularity' else 'text-dark' }}">
+              Popularity
+            </a>
+
+            <a href="{{ url_for('index', q=search_query, category=selected_category, brand=selected_brand, min_price=min_price, max_price=max_price, min_rating=min_rating, min_discount=min_discount, sort='price_low') }}" 
+               class="small text-decoration-none pb-1 border-bottom-2 {{ 'fw-bold text-primary border-bottom border-primary border-2' if sort_by == 'price_low' else 'text-dark' }}">
+              Price -- Low to High
+            </a>
+
+            <a href="{{ url_for('index', q=search_query, category=selected_category, brand=selected_brand, min_price=min_price, max_price=max_price, min_rating=min_rating, min_discount=min_discount, sort='price_high') }}" 
+               class="small text-decoration-none pb-1 border-bottom-2 {{ 'fw-bold text-primary border-bottom border-primary border-2' if sort_by == 'price_high' else 'text-dark' }}">
+              Price -- High to Low
+            </a>
+
+            <a href="{{ url_for('index', q=search_query, category=selected_category, brand=selected_brand, min_price=min_price, max_price=max_price, min_rating=min_rating, min_discount=min_discount, sort='discount') }}" 
+               class="small text-decoration-none pb-1 border-bottom-2 {{ 'fw-bold text-primary border-bottom border-primary border-2' if sort_by == 'discount' else 'text-dark' }}">
+              Discount
+            </a>
+
+            <a href="{{ url_for('index', q=search_query, category=selected_category, brand=selected_brand, min_price=min_price, max_price=max_price, min_rating=min_rating, min_discount=min_discount, sort='rating') }}" 
+               class="small text-decoration-none pb-1 border-bottom-2 {{ 'fw-bold text-primary border-bottom border-primary border-2' if sort_by == 'rating' else 'text-dark' }}">
+              Rating
+            </a>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- PRODUCT CARDS GRID (Flipkart Style) -->
+      {% if products %}
+      <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-md-3">
+        {% for p in products %}
+          <div class="col">
+            <div class="fk-card">
+              
+              <!-- Wishlist Heart Button -->
+              <button 
+                class="wishlist-heart-btn {{ 'active' if p.in_wishlist else '' }}" 
+                onclick="toggleWishlist({{ p.id }}, this)" 
+                title="Save to Wishlist"
+              >
+                <i class="bi {{ 'bi-heart-fill' if p.in_wishlist else 'bi-heart' }}"></i>
+              </button>
+
+              <!-- Image with Fallback -->
+              <div class="card-img-wrapper">
+                <a href="{{ url_for('product_detail', product_id=p.id) }}" class="d-flex align-items-center justify-content-center w-100 h-100">
+                  <img src="{{ p.image_url }}" alt="{{ p.title }}" 
+                       onerror="handleImageError(this, '{{ p.title }}')"
+                       loading="lazy">
+                </a>
+              </div>
+
+              <!-- Product Card Details -->
+              <div class="card-body-content">
+                <div class="brand-label">{{ p.brand }}</div>
+                
+                <a href="{{ url_for('product_detail', product_id=p.id) }}" class="product-card-title text-decoration-none" title="{{ p.title }}">
+                  {{ p.title }}
+                </a>
+
+                <!-- Rating and Assured Badge -->
+                <div class="d-flex align-items-center justify-content-between mt-1 mb-2">
+                  <div class="d-flex align-items-center">
+                    <span class="rating-pill">
+                      {{ p.rating }} <i class="bi bi-star-fill" style="font-size: 10px;"></i>
+                    </span>
+                    <span class="rating-count">({{ p.rating_count | num }})</span>
+                  </div>
+
+                  {% if p.is_assured %}
+                    <span class="boom-assured-badge" title="Boom Assured Guarantee">
+                      <i class="bi bi-patch-check-fill"></i> Assured
+                    </span>
+                  {% endif %}
+                </div>
+
+                <!-- Price Row -->
+                <div class="price-block">
+                  <span class="current-price">{{ p.price | rupee }}</span>
+                  <span class="original-price">{{ p.original_price | rupee }}</span>
+                  <span class="discount-badge">{{ p.discount_percent }}% off</span>
+                </div>
+
+                <div class="free-delivery-text">
+                  <i class="bi bi-check2"></i> Free Delivery by Tomorrow
+                </div>
+
+                <!-- Action Button -->
+                <div class="card-actions">
+                  <button class="btn-card-cart" onclick="addToCart({{ p.id }}, 1)">
+                    <i class="bi bi-cart-plus-fill"></i> ADD TO CART
+                  </button>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      {% else %}
+        <!-- Empty State -->
+        <div class="card border-0 shadow-sm text-center py-5 my-3">
+          <div class="card-body">
+            <i class="bi bi-search text-muted" style="font-size: 54px;"></i>
+            <h4 class="mt-3 fw-bold">Sorry, no products found!</h4>
+            <p class="text-muted">Please check the spelling or try searching for something else.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary px-4 fw-bold mt-2">View All Products</a>
+          </div>
+        </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

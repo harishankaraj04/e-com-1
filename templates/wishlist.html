@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}My Wishlist | Boom{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4" style="max-width: 1100px;">
+  
+  <div class="card border-0 shadow-sm bg-white">
+    <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+      <h4 class="fw-bold mb-0">My Wishlist ({{ products|length }})</h4>
+      {% if products %}
+        <span class="small text-muted">All saved items are reserved in your account</span>
+      {% endif %}
+    </div>
+
+    <div class="card-body p-0">
+      {% if products %}
+        {% for p in products %}
+          <div class="p-3 border-bottom d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+            
+            <div class="d-flex align-items-center gap-3">
+              <a href="{{ url_for('product_detail', product_id=p.id) }}">
+                <img src="{{ p.image_url }}" alt="{{ p.title }}" style="width: 90px; height: 90px; object-fit: contain;" onerror="handleImageError(this, '{{ p.title }}')">
+              </a>
+              <div>
+                <a href="{{ url_for('product_detail', product_id=p.id) }}" class="fw-bold text-dark text-decoration-none">
+                  {{ p.title }}
+                </a>
+                
+                <div class="d-flex align-items-center gap-2 mt-1">
+                  <span class="rating-pill" style="font-size: 11px;">
+                    {{ p.rating }} ★
+                  </span>
+                  <span class="text-muted small">({{ p.rating_count | num }})</span>
+                  {% if p.is_assured %}
+                    <span class="boom-assured-badge ms-2"><i class="bi bi-patch-check-fill"></i> Assured</span>
+                  {% endif %}
+                </div>
+
+                <div class="price-block mt-2">
+                  <span class="current-price">{{ p.price | rupee }}</span>
+                  <span class="original-price">{{ p.original_price | rupee }}</span>
+                  <span class="discount-badge">{{ p.discount_percent }}% off</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+              <button class="btn btn-warning fw-bold btn-sm text-dark px-3 py-2" onclick="addToCart({{ p.id }}, 1); toggleWishlist({{ p.id }}); setTimeout(() => window.location.reload(), 300);">
+                <i class="bi bi-cart3"></i> Move to Cart
+              </button>
+              <button class="btn btn-outline-danger btn-sm p-2" onclick="toggleWishlist({{ p.id }}); setTimeout(() => window.location.reload(), 300);" title="Remove from wishlist">
+                <i class="bi bi-trash3"></i>
+              </button>
+            </div>
+
+          </div>
+        {% endfor %}
+      {% else %}
+        <!-- Empty Wishlist -->
+        <div class="text-center py-5">
+          <i class="bi bi-heart text-muted" style="font-size: 64px;"></i>
+          <h4 class="fw-bold mt-3">Empty Wishlist</h4>
+          <p class="text-muted">You have no items in your wishlist. Start adding items you love!</p>
+          <a href="{{ url_for('index') }}" class="btn btn-primary px-4 fw-bold mt-2">
+            Continue Shopping
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

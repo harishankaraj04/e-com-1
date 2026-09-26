@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ product.title }} - Buy Online at Best Price on Boom{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5">
+
+  <!-- Breadcrumb (Flipkart Style) -->
+  <nav aria-label="breadcrumb" class="my-2">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-muted text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('index', category=product.category) }}" class="text-muted text-decoration-none">{{ product.category }}</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('index', brand=product.brand) }}" class="text-muted text-decoration-none">{{ product.brand }}</a></li>
+      <li class="breadcrumb-item active text-truncate" style="max-width: 300px;" aria-current="page">{{ product.title }}</li>
+    </ol>
+  </nav>
+
+  <div class="product-detail-container">
+    <div class="row g-4">
+
+      <!-- LEFT COLUMN: IMAGE GALLERY & ACTION BUTTONS -->
+      <div class="col-lg-5">
+        <div class="image-gallery-sticky">
+          
+          <!-- Main Image -->
+          <div class="main-image-container position-relative">
+            <button 
+              class="wishlist-heart-btn {{ 'active' if product.in_wishlist else '' }}" 
+              onclick="toggleWishlist({{ product.id }}, this)" 
+              title="Add to Wishlist"
+            >
+              <i class="bi {{ 'bi-heart-fill' if product.in_wishlist else 'bi-heart' }}"></i>
+            </button>
+
+            <img 
+              id="main-product-img" 
+              src="{{ product.image_url }}" 
+              alt="{{ product.title }}"
+              onerror="handleImageError(this, '{{ product.title }}')"
+            >
+          </div>
+
+          <!-- Thumbnail Row -->
+          <div class="thumbnail-row">
+            {% for img_src in product.images %}
+              <div class="thumb-item {{ 'active' if loop.first else '' }}" onclick="switchProductImage(this, '{{ img_src }}')">
+                <img src="{{ img_src }}" alt="Preview" onerror="handleImageError(this, 'Thumb')">
+              </div>
+            {% endfor %}
+          </div>
+
+          <!-- Flipkart Big CTA Buttons -->
+          <div class="action-btn-row">
+            <button class="btn-fk-cart" onclick="addToCart({{ product.id }}, 1)">
+              <i class="bi bi-cart3 fs-5"></i> ADD TO CART
+            </button>
+            <button class="btn-fk-buy" onclick="addToCart({{ product.id }}, 1, true)">
+              <i class="bi bi-lightning-fill fs-5"></i> BUY NOW
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: PRODUCT DETAILS, OFFERS, SPECS & REVIEWS -->
+      <div class="col-lg-7">
+        
+        <!-- Title -->
+        <h1 class="h4 fw-bold text-dark mb-2">{{ product.title }}</h1>
+
+        <!-- Rating, Review Count, Assured Badge -->
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <span class="rating-pill fs-6 px-2 py-1">
+            {{ product.rating }} <i class="bi bi-star-fill" style="font-size: 11px;"></i>
+          </span>
+          <span class="text-muted fw-bold small">
+            {{ product.rating_count | num }} Ratings &amp; {{ reviews|length }} Reviews
+          </span>
+          {% if product.is_assured %}
+            <span class="boom-assured-badge py-1 px-2">
+              <i class="bi bi-patch-check-fill"></i> Boom Assured
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Price Section -->
+        <div class="d-flex align-items-baseline gap-3 mb-2">
+          <span class="text-success fw-bold small">Special price</span>
+        </div>
+        <div class="d-flex align-items-baseline gap-3 mb-3">
+          <span class="fs-2 fw-bold text-dark">{{ product.price | rupee }}</span>
+          <span class="fs-5 text-muted text-decoration-line-through">{{ product.original_price | rupee }}</span>
+          <span class="fs-5 fw-bold text-success">{{ product.discount_percent }}% off</span>
+        </div>
+
+        <!-- Available Offers Box (Flipkart Style) -->
+        <div class="offers-card">
+          <div class="offers-title">
+            <i class="bi bi-tag-fill text-success"></i> Available Offers
+          </div>
+          {% for off in product.offers %}
+            <div class="offer-item">
+              <i class="bi bi-patch-check-fill offer-tag-icon"></i>
+              <span>{{ off }}</span>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Delivery & Pincode Checker -->
+        <div class="pincode-card">
+          <span class="fw-bold small text-muted text-uppercase me-2"><i class="bi bi-geo-alt-fill"></i> Delivery:</span>
+          <div class="d-flex align-items-center gap-2">
+            <input type="text" id="pincode-input" class="pincode-input" placeholder="Enter Pincode" maxlength="6" value="560001">
+            <button class="pincode-btn" onclick="checkPincode()">Check</button>
+          </div>
+          <div id="pincode-result" class="ms-2">
+            <span class="text-success small fw-bold"><i class="bi bi-truck"></i> Free Delivery by {{ est_delivery }}</span>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-uppercase small text-muted">Product Description</h6>
+          <p class="text-secondary leading-relaxed">{{ product.description }}</p>
+        </div>
+
+        <!-- Highlights -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-uppercase small text-muted mb-2">Highlights</h6>
+          <ul class="list-unstyled mb-0">
+            {% for h in product.highlights %}
+              <li class="mb-1 small d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill text-primary" style="font-size: 12px;"></i>
+                <span>{{ h }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <!-- Specifications Table -->
+        <div class="mb-4">
+          <h6 class="fw-bold text-uppercase small text-muted mb-2">Specifications</h6>
+          <div class="border rounded-1 overflow-hidden">
+            <table class="spec-table mb-0">
+              <tbody>
+                {% for key, val in product.specs.items() %}
+                  <tr>
+                    <td class="spec-key">{{ key }}</td>
+                    <td class="spec-val fw-semibold">{{ val }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Ratings & Reviews Section -->
+        <div class="card border-0 bg-light p-3 rounded-2 mt-4">
+          <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+            <h5 class="fw-bold m-0">Ratings &amp; Customer Reviews</h5>
+            <button class="btn btn-outline-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#reviewModal">
+              <i class="bi bi-pencil-square"></i> Rate Product
+            </button>
+          </div>
+
+          <!-- Overall Rating Bar Breakdown -->
+          <div class="row align-items-center mb-4">
+            <div class="col-sm-4 text-center border-end">
+              <div class="display-5 fw-bold text-dark">{{ product.rating }}<i class="bi bi-star-fill fs-3 text-warning ms-1"></i></div>
+              <div class="text-muted small fw-bold">{{ product.rating_count | num }} Ratings &amp;</div>
+              <div class="text-muted small fw-bold">{{ reviews|length }} Reviews</div>
+            </div>
+            
+            <div class="col-sm-8 ps-sm-4">
+              {% for star in [5, 4, 3, 2, 1] %}
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span class="small text-muted" style="width: 30px;">{{ star }} ★</span>
+                  <div class="progress flex-grow-1" style="height: 6px;">
+                    <div class="progress-bar {{ 'bg-success' if star >= 4 else ('bg-warning' if star == 3 else 'bg-danger') }}" 
+                         role="progressbar" 
+                         style="width: {{ 85 if star == 5 else (12 if star == 4 else (2 if star == 3 else 1)) }}%"></div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Reviews List -->
+          <div class="reviews-list">
+            {% for r in reviews %}
+              <div class="card border-0 shadow-sm p-3 mb-3 bg-white">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <span class="rating-pill" style="font-size: 11px;">
+                    {{ r.rating }} ★
+                  </span>
+                  <span class="fw-bold text-dark small">{{ r.title }}</span>
+                </div>
+                <p class="text-secondary small mb-2">{{ r.comment }}</p>
+                <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 11px;">
+                  <span class="fw-bold">{{ r.user_name }}</span>
+                  {% if r.verified %}
+                    <span class="text-success"><i class="bi bi-check-circle-fill"></i> Certified Buyer</span>
+                  {% endif %}
+                  <span>• {{ r.date }}</span>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Similar Products Section -->
+  {% if similar_products %}
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="section-header">
+      <h2 class="section-title">Similar Products in {{ product.category }}</h2>
+    </div>
+    <div class="card-body p-3">
+      <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-md-4">
+        {% for sp in similar_products %}
+          <div class="col">
+            <div class="fk-card">
+              <button 
+                class="wishlist-heart-btn {{ 'active' if sp.in_wishlist else '' }}" 
+                onclick="toggleWishlist({{ sp.id }}, this)" 
+                title="Add to Wishlist"
+              >
+                <i class="bi {{ 'bi-heart-fill' if sp.in_wishlist else 'bi-heart' }}"></i>
+              </button>
+              
+              <div class="card-img-wrapper">
+                <a href="{{ url_for('product_detail', product_id=sp.id) }}">
+                  <img src="{{ sp.image_url }}" alt="{{ sp.title }}" onerror="handleImageError(this, '{{ sp.title }}')">
+                </a>
+              </div>
+              <div class="card-body-content">
+                <a href="{{ url_for('product_detail', product_id=sp.id) }}" class="product-card-title text-decoration-none">
+                  {{ sp.title }}
+                </a>
+                <div class="price-block">
+                  <span class="current-price">{{ sp.price | rupee }}</span>
+                  <span class="original-price">{{ sp.original_price | rupee }}</span>
+                  <span class="discount-badge">{{ sp.discount_percent }}% off</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Write Review Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="reviewModalLabel">Review {{ product.title|truncate(35) }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Your Name</label>
+          <input type="text" id="review-user-name" class="form-control" placeholder="Haris" value="Haris">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Rating</label>
+          <select id="review-rating" class="form-select">
+            <option value="5" selected>5 ★★★★★ (Outstanding)</option>
+            <option value="4">4 ★★★★☆ (Very Good)</option>
+            <option value="3">3 ★★★☆☆ (Good)</option>
+            <option value="2">2 ★★☆☆☆ (Fair)</option>
+            <option value="1">1 ★☆☆☆☆ (Poor)</option>
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Review Headline</label>
+          <input type="text" id="review-title" class="form-control" placeholder="e.g. Excellent battery and stunning design">
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-bold">Detailed Feedback</label>
+          <textarea id="review-comment" class="form-control" rows="4" placeholder="Write what you liked or disliked about this product..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary fw-bold" onclick="submitReview({{ product.id }})">SUBMIT REVIEW</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
