@@ -12,7 +12,10 @@ pipeline {
         stage('Application Check') {
             steps {
                 sh '''
-                    echo "Checking e-com-1"
+                    echo "===== e-com-1 ====="
+                    pwd
+                    git remote -v
+                    git branch --show-current
                     ls -la
                     python3 --version
                 '''
@@ -25,7 +28,6 @@ pipeline {
                     rm -rf jenkins-venv
                     python3 -m venv jenkins-venv
                     ./jenkins-venv/bin/python --version
-                    ./jenkins-venv/bin/pip --version
                 '''
             }
         }
@@ -51,8 +53,8 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh '''
-                    echo "Building Docker image..."
-                    docker build -t e-commerce-app:latest .
+                    docker build --no-cache -t e-commerce-app:latest .
+                    docker images e-commerce-app
                 '''
             }
         }
@@ -60,21 +62,19 @@ pipeline {
         stage('Docker Deploy') {
             steps {
                 sh '''
-                    echo "Stopping old container..."
                     docker stop e-commerce-app || true
-
-                    echo "Removing old container..."
                     docker rm e-commerce-app || true
-
-                    echo "Starting new container..."
-                    docker run -d \
-                        --name e-commerce-app \
-                        -p 5000:5000 \
-                        --restart unless-stopped \
-                        e-commerce-app:latest
-
-                    echo "Container status:"
+                    docker run -d --name e-commerce-app -p 5000:5000 --restart unless-stopped e-commerce-app:latest
                     docker ps
+                '''
+            }
+        }
+
+        stage('Application Test') {
+            steps {
+                sh '''
+                    sleep 5
+                    curl -f http://localhost:5000
                 '''
             }
         }
