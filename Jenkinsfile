@@ -47,15 +47,46 @@ pipeline {
                 '''
             }
         }
+
+        stage('Docker Build') {
+            steps {
+                sh '''
+                    echo "Building Docker image..."
+                    docker build -t e-commerce-app:latest .
+                '''
+            }
+        }
+
+        stage('Docker Deploy') {
+            steps {
+                sh '''
+                    echo "Stopping old container..."
+                    docker stop e-commerce-app || true
+
+                    echo "Removing old container..."
+                    docker rm e-commerce-app || true
+
+                    echo "Starting new container..."
+                    docker run -d \
+                        --name e-commerce-app \
+                        -p 5000:5000 \
+                        --restart unless-stopped \
+                        e-commerce-app:latest
+
+                    echo "Container status:"
+                    docker ps
+                '''
+            }
+        }
     }
 
     post {
         success {
-            echo 'e-com-1 CI SUCCESS'
+            echo 'e-com-1 CI/CD SUCCESS'
         }
 
         failure {
-            echo 'e-com-1 CI FAILED'
+            echo 'e-com-1 CI/CD FAILED'
         }
     }
 }
