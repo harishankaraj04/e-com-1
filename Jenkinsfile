@@ -41,10 +41,8 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh '''
-                    ./jenkins-venv/bin/python -m py_compile app.py
-                    ./jenkins-venv/bin/python -m unittest test_app.py
-                '''
+                ./jenkins-venv/bin/python -m py_compile app.py
+                ./jenkins-venv/bin/python -m unittest test_app.py
             }
         }
     }
@@ -58,4 +56,4 @@ pipeline {
             echo 'e-com-1 CI FAILED'
         }
     }
-}}
+}
