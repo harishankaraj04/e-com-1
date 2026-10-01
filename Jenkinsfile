@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -18,10 +19,22 @@ pipeline {
             }
         }
 
+        stage('Create Virtual Environment') {
+            steps {
+                sh '''
+                    rm -rf jenkins-venv
+                    python3 -m venv jenkins-venv
+                    ./jenkins-venv/bin/python --version
+                    ./jenkins-venv/bin/pip --version
+                '''
+            }
+        }
+
         stage('Install Dependencies') {
             steps {
                 sh '''
-                    python3 -m pip install -r requirements.txt
+                    ./jenkins-venv/bin/pip install --upgrade pip
+                    ./jenkins-venv/bin/pip install -r requirements.txt
                 '''
             }
         }
@@ -29,8 +42,8 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
-                    python3 -m py_compile app.py
-                    echo "Test successful"
+                    ./jenkins-venv/bin/python -m py_compile app.py
+                    ./jenkins-venv/bin/python -m unittest test_app.py
                 '''
             }
         }
@@ -38,10 +51,11 @@ pipeline {
 
     post {
         success {
-            echo "e-com-1 CI SUCCESS"
+            echo 'e-com-1 CI SUCCESS'
         }
+
         failure {
-            echo "e-com-1 CI FAILED"
+            echo 'e-com-1 CI FAILED'
         }
     }
-}
+}}
